@@ -28,18 +28,18 @@ class EditConfigHandlerTest(testing_common.TestCase):
 
   def _AddSampleTestData(self):
     """Adds some sample data used in the tests below."""
-    master = graph_data.Master(id='TheMaster').put()
-    graph_data.Bot(id='TheBot', parent=master).put()
-    graph_data.TestMetadata(id='TheMaster/TheBot/Suite1').put()
-    graph_data.TestMetadata(id='TheMaster/TheBot/Suite2').put()
+    main = graph_data.Main(id='TheMain').put()
+    graph_data.Bot(id='TheBot', parent=main).put()
+    graph_data.TestMetadata(id='TheMain/TheBot/Suite1').put()
+    graph_data.TestMetadata(id='TheMain/TheBot/Suite2').put()
     graph_data.TestMetadata(
-        id='TheMaster/TheBot/Suite1/aaa', has_rows=True).put()
+        id='TheMain/TheBot/Suite1/aaa', has_rows=True).put()
     graph_data.TestMetadata(
-        id='TheMaster/TheBot/Suite1/bbb', has_rows=True).put()
+        id='TheMain/TheBot/Suite1/bbb', has_rows=True).put()
     graph_data.TestMetadata(
-        id='TheMaster/TheBot/Suite2/ccc', has_rows=True).put()
+        id='TheMain/TheBot/Suite2/ccc', has_rows=True).put()
     graph_data.TestMetadata(
-        id='TheMaster/TheBot/Suite2/ddd', has_rows=True).put()
+        id='TheMain/TheBot/Suite2/ddd', has_rows=True).put()
 
   def testSplitPatternLines_OnePattern(self):
     # The SplitPatternLines function returns a list of patterns.
@@ -61,7 +61,7 @@ class EditConfigHandlerTest(testing_common.TestCase):
         edit_config_handler._SplitPatternLines('A/b/c/d\n\nE/f/g/h\n'))
 
   def testSplitPatternLines_NoSlashes_RaisesError(self):
-    # A valid test path must contain a master, bot, and test part.
+    # A valid test path must contain a main, bot, and test part.
     with self.assertRaises(request_handler.InvalidInputError):
       edit_config_handler._SplitPatternLines('invalid')
 
@@ -85,25 +85,25 @@ class EditConfigHandlerTest(testing_common.TestCase):
   def testChangeTestPatterns_OnlyAdd_ReturnsAddedAndEmptySet(self):
     self._AddSampleTestData()
     self.assertEqual(
-        ({'TheMaster/TheBot/Suite1/aaa'}, set()),
+        ({'TheMain/TheBot/Suite1/aaa'}, set()),
         edit_config_handler._ChangeTestPatterns(
             ['*/*/*/bbb'], ['*/*/*/aaa', '*/*/*/bbb']))
 
   def testChangeTestPatterns_OnlyRemove_ReturnsEmptySetAndRemoved(self):
     self._AddSampleTestData()
     self.assertEqual(
-        (set(), {'TheMaster/TheBot/Suite1/bbb'}),
+        (set(), {'TheMain/TheBot/Suite1/bbb'}),
         edit_config_handler._ChangeTestPatterns(
             ['*/*/*/aaa', '*/*/Suite1/bbb'], ['*/*/*/aaa']))
 
   def testChangeTestPatterns_RemoveAndAdd_ReturnsAddedAndRemoved(self):
     self._AddSampleTestData()
     added = {
-        'TheMaster/TheBot/Suite1/aaa',
+        'TheMain/TheBot/Suite1/aaa',
     }
     removed = {
-        'TheMaster/TheBot/Suite2/ccc',
-        'TheMaster/TheBot/Suite2/ddd',
+        'TheMain/TheBot/Suite2/ccc',
+        'TheMain/TheBot/Suite2/ddd',
     }
     self.assertEqual(
         (added, removed),
@@ -113,7 +113,7 @@ class EditConfigHandlerTest(testing_common.TestCase):
   def testChangeTestPatterns_CanTakeSetsAsArguments(self):
     self._AddSampleTestData()
     self.assertEqual(
-        ({'TheMaster/TheBot/Suite1/aaa'}, set()),
+        ({'TheMain/TheBot/Suite1/aaa'}, set()),
         edit_config_handler._ChangeTestPatterns(set(), {'*/*/Suite1/aaa'}))
 
   def testComputeDeltas_Empty(self):

@@ -103,7 +103,7 @@ def _MakeBisectFYITryJob(test_name, bisect_config):
       bot=bisect_bot,
       config=config_python_string,
       bug_id=bisect_config.get('bug_id', -1),
-      master_name=bisect_config.get('master_name', 'ChromiumPerf'),
+      main_name=bisect_config.get('main_name', 'ChromiumPerf'),
       job_type='bisect-fyi',
       job_name=test_name)
 

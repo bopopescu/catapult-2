@@ -152,5 +152,5 @@ def _GetTestSuiteFromKey(test_key):
 def GetBotNamesFromAlerts(alerts):
   """Gets a set with the names of the bots related to some alerts."""
   # a.test is the key of a TestMetadata entity, and the TestPath is a path like
-  # master_name/bot_name/test_suite_name/metric...
+  # main_name/bot_name/test_suite_name/metric...
   return {utils.TestPath(a.test).split('/')[1] for a in alerts}

@@ -33,18 +33,18 @@ class EditSheriffsTest(testing_common.TestCase):
 
   def _AddSampleTestData(self):
     """Adds some sample data used in the tests below."""
-    master = graph_data.Master(id='TheMaster').put()
-    graph_data.Bot(id='TheBot', parent=master).put()
-    graph_data.TestMetadata(id='TheMaster/TheBot/Suite1').put()
-    graph_data.TestMetadata(id='TheMaster/TheBot/Suite2').put()
+    main = graph_data.Main(id='TheMain').put()
+    graph_data.Bot(id='TheBot', parent=main).put()
+    graph_data.TestMetadata(id='TheMain/TheBot/Suite1').put()
+    graph_data.TestMetadata(id='TheMain/TheBot/Suite2').put()
     graph_data.TestMetadata(
-        id='TheMaster/TheBot/Suite1/aaa', has_rows=True).put()
+        id='TheMain/TheBot/Suite1/aaa', has_rows=True).put()
     graph_data.TestMetadata(
-        id='TheMaster/TheBot/Suite1/bbb', has_rows=True).put()
+        id='TheMain/TheBot/Suite1/bbb', has_rows=True).put()
     graph_data.TestMetadata(
-        id='TheMaster/TheBot/Suite2/ccc', has_rows=True).put()
+        id='TheMain/TheBot/Suite2/ccc', has_rows=True).put()
     graph_data.TestMetadata(
-        id='TheMaster/TheBot/Suite2/ddd', has_rows=True).put()
+        id='TheMain/TheBot/Suite2/ddd', has_rows=True).put()
 
   def _AddSheriff(self, name, email=None, url=None,
                   internal_only=False, summarize=False, patterns=None,
@@ -99,10 +99,10 @@ class EditSheriffsTest(testing_common.TestCase):
     # updated.
     self.ExecuteTaskQueueTasks(
         '/put_entities_task', edit_config_handler._TASK_QUEUE_NAME)
-    aaa = utils.TestKey('TheMaster/TheBot/Suite1/aaa').get()
-    bbb = utils.TestKey('TheMaster/TheBot/Suite1/bbb').get()
-    ccc = utils.TestKey('TheMaster/TheBot/Suite2/ccc').get()
-    ddd = utils.TestKey('TheMaster/TheBot/Suite2/ddd').get()
+    aaa = utils.TestKey('TheMain/TheBot/Suite1/aaa').get()
+    bbb = utils.TestKey('TheMain/TheBot/Suite1/bbb').get()
+    ccc = utils.TestKey('TheMain/TheBot/Suite2/ccc').get()
+    ddd = utils.TestKey('TheMain/TheBot/Suite2/ddd').get()
     self.assertEqual(sheriff_entity.key, aaa.sheriff)
     self.assertEqual(sheriff_entity.key, bbb.sheriff)
     self.assertIsNone(ccc.sheriff)
@@ -124,10 +124,10 @@ class EditSheriffsTest(testing_common.TestCase):
     # updated.
     self.ExecuteTaskQueueTasks(
         '/put_entities_task', edit_config_handler._TASK_QUEUE_NAME)
-    aaa = utils.TestKey('TheMaster/TheBot/Suite1/aaa').get()
-    bbb = utils.TestKey('TheMaster/TheBot/Suite1/bbb').get()
-    ccc = utils.TestKey('TheMaster/TheBot/Suite2/ccc').get()
-    ddd = utils.TestKey('TheMaster/TheBot/Suite2/ddd').get()
+    aaa = utils.TestKey('TheMain/TheBot/Suite1/aaa').get()
+    bbb = utils.TestKey('TheMain/TheBot/Suite1/bbb').get()
+    ccc = utils.TestKey('TheMain/TheBot/Suite2/ccc').get()
+    ddd = utils.TestKey('TheMain/TheBot/Suite2/ddd').get()
     self.assertIsNone(aaa.sheriff)
     self.assertIsNone(bbb.sheriff)
     self.assertEqual(sheriff_entity.key, ccc.sheriff)

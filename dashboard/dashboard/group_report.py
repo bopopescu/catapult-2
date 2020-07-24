@@ -196,7 +196,7 @@ def _GetSubTestsForAlerts(alert_list):
   """Gets subtest dict for list of alerts."""
   subtests = {}
   for alert in alert_list:
-    bot_name = alert['master'] + '/' + alert['bot']
+    bot_name = alert['main'] + '/' + alert['bot']
     testsuite = alert['testsuite']
     if bot_name not in subtests:
       subtests[bot_name] = {}

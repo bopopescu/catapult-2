@@ -40,7 +40,7 @@ class AlertTest(testing_common.TestCase):
 
   def testGetTestMetadataKey_Test(self):
     a = anomaly.Anomaly(
-        test=ndb.Key('Master', 'm', 'Bot', 'b', 'Test', 't', 'Test', 't'))
+        test=ndb.Key('Main', 'm', 'Bot', 'b', 'Test', 't', 'Test', 't'))
     k = a.GetTestMetadataKey()
     self.assertEqual('TestMetadata', k.kind())
     self.assertEqual('m/b/t/t', k.id())
@@ -59,10 +59,10 @@ class AlertTest(testing_common.TestCase):
     self.assertIsNone(k)
 
   def testGetAlertsForTest(self):
-    old_style_key1 = utils.OldStyleTestKey('master/bot/test1/metric')
-    new_style_key1 = utils.TestMetadataKey('master/bot/test1/metric')
-    old_style_key2 = utils.OldStyleTestKey('master/bot/test2/metric')
-    new_style_key2 = utils.TestMetadataKey('master/bot/test2/metric')
+    old_style_key1 = utils.OldStyleTestKey('main/bot/test1/metric')
+    new_style_key1 = utils.TestMetadataKey('main/bot/test1/metric')
+    old_style_key2 = utils.OldStyleTestKey('main/bot/test2/metric')
+    new_style_key2 = utils.TestMetadataKey('main/bot/test2/metric')
     anomaly.Anomaly(id="old_1", test=old_style_key1).put()
     anomaly.Anomaly(id="old_1a", test=old_style_key1).put()
     anomaly.Anomaly(id="old_2", test=old_style_key2).put()

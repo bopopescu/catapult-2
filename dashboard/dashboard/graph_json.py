@@ -240,15 +240,15 @@ def _PointInfoDict(row, anomaly_annotation_map):
         'a_stdio_uri_prefix' in row_dict):
       # Many data points have been added with a stdio prefix expanded out to
       # 'None' when 'a_stdio_uri_prefix' is set correctly. Fix them up.
-      # Add in the master name as well; if the waterfall is 'CamelCase' it
+      # Add in the main name as well; if the waterfall is 'CamelCase' it
       # should be 'camel.client.case'.
-      master_camel_case = utils.TestPath(row.parent_test).split('/')[0]
-      master_parts = re.findall('([A-Z][a-z0-9]+)', master_camel_case)
-      if master_parts and len(master_parts) == 2:
-        master_name = '%s.client.%s' % (
-            master_parts[1].lower(), master_parts[0].lower())
+      main_camel_case = utils.TestPath(row.parent_test).split('/')[0]
+      main_parts = re.findall('([A-Z][a-z0-9]+)', main_camel_case)
+      if main_parts and len(main_parts) == 2:
+        main_name = '%s.client.%s' % (
+            main_parts[1].lower(), main_parts[0].lower())
         val = val.replace('(None', '(%s/%s/' % (
-            row_dict['a_stdio_uri_prefix'], master_name))
+            row_dict['a_stdio_uri_prefix'], main_name))
 
     if name.startswith('r_'):
       point_info[name] = val

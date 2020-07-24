@@ -86,18 +86,18 @@ def _CreateTestSuiteDict():
           ...
       }
 
-    Where 'mas', 'mon', 'dep', and 'des' are abbreviations for 'masters',
+    Where 'mas', 'mon', 'dep', and 'des' are abbreviations for 'mains',
     'monitored', 'deprecated', and 'description', respectively.
   """
   suites = _FetchSuites()
-  suite_to_masters = _CreateSuiteMastersDict(suites)
+  suite_to_mains = _CreateSuiteMainsDict(suites)
   suite_to_description = _CreateSuiteDescriptionDict(suites)
   suite_to_monitored = _CreateSuiteMonitoredDict()
   nondeprecated_suites = _CreateSuiteNondeprecatedSet(suites)
 
   result = {}
-  for name in suite_to_masters:
-    result[name] = {'mas': suite_to_masters[name]}
+  for name in suite_to_mains:
+    result[name] = {'mas': suite_to_mains[name]}
     if name in suite_to_monitored:
       result[name]['mon'] = suite_to_monitored[name]
     if name in suite_to_description:
@@ -125,16 +125,16 @@ def _FetchSuites():
   return suites
 
 
-def _CreateSuiteMastersDict(suites):
-  """Returns an initial suite dict with names mapped to masters.
+def _CreateSuiteMainsDict(suites):
+  """Returns an initial suite dict with names mapped to mains.
 
   Args:
     suites: A list of entities for top-level TestMetadata entities.
 
   Returns:
     A dictionary mapping the test-suite names to dicts which just have
-    the key "masters", the value of which is a list of dicts mapping
-    master names to dict of bots.
+    the key "mains", the value of which is a list of dicts mapping
+    main names to dict of bots.
   """
   name_to_suites = {}
   for suite in suites:
@@ -145,27 +145,27 @@ def _CreateSuiteMastersDict(suites):
 
   result = {}
   for name, this_suites in name_to_suites.iteritems():
-    result[name] = _MasterToBotsToDeprecatedDict(this_suites)
+    result[name] = _MainToBotsToDeprecatedDict(this_suites)
   return result
 
 
-def _MasterToBotsToDeprecatedDict(suites):
-  """Makes a dictionary listing masters, bots and deprecated for tests.
+def _MainToBotsToDeprecatedDict(suites):
+  """Makes a dictionary listing mains, bots and deprecated for tests.
 
   Args:
     suites: A collection of test suite TestMetadata entities. All of the keys in
         this set should have the same test suite name.
 
   Returns:
-    A dictionary mapping master names to bot names to deprecated.
+    A dictionary mapping main names to bot names to deprecated.
   """
   result = {}
-  for master in {s.master_name for s in suites}:
+  for main in {s.main_name for s in suites}:
     bot = {}
     for suite in suites:
-      if suite.master_name == master:
+      if suite.main_name == main:
         bot[suite.bot_name] = suite.deprecated
-    result[master] = bot
+    result[main] = bot
   return result
 
 
@@ -211,14 +211,14 @@ def _FetchSuitesWithMonitoredProperty():
 def _GetTestSubPath(key):
   """Gets the part of the test path after the suite, for the given test key.
 
-  For example, for a test with the test path 'MyMaster/bot/my_suite/foo/bar',
+  For example, for a test with the test path 'MyMain/bot/my_suite/foo/bar',
   this should return 'foo/bar'.
 
   Args:
     key: The key of the TestMetadata entity.
 
   Returns:
-    Slash-separated test path part after master/bot/suite.
+    Slash-separated test path part after main/bot/suite.
   """
   return '/'.join(p for p in key.string_id().split('/')[3:])
 

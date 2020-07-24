@@ -179,13 +179,13 @@ def _MarkDeprecated(test):
   # on whether tests are deprecated, so when a new suite is deprecated,
   # the cache needs to be cleared.
   layered_cache.Delete(graph_data.LIST_TESTS_SUBTEST_CACHE_KEY % (
-      test.master_name, test.bot_name, test.suite_name))
+      test.main_name, test.bot_name, test.suite_name))
 
   # Check whether the test suite now contains only deprecated tests, and
   # if so, deprecate it too.
   suite = ndb.Key(
       'TestMetadata', '%s/%s/%s' % (
-          test.master_name, test.bot_name, test.suite_name)).get()
+          test.main_name, test.bot_name, test.suite_name)).get()
   if suite and not suite.deprecated and _AllSubtestsDeprecated(suite):
     suite.deprecated = True
     yield op.db.Put(suite)

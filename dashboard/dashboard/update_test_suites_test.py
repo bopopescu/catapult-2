@@ -99,9 +99,9 @@ class ListTestSuitesTest(testing_common.TestCase):
   def testPost_InternalOnly(self):
     self.SetCurrentUser('internal@chromium.org')
     self._AddSampleData()
-    master_key = ndb.Key('Master', 'Chromium')
+    main_key = ndb.Key('Main', 'Chromium')
     graph_data.Bot(
-        id='internal_mac', parent=master_key, internal_only=True).put()
+        id='internal_mac', parent=main_key, internal_only=True).put()
     graph_data.TestMetadata(
         id='Chromium/internal_mac/internal_test', internal_only=True).put()
 
@@ -200,7 +200,7 @@ class ListTestSuitesTest(testing_common.TestCase):
         ]),
         suite_keys)
 
-  def testCreateSuiteMastersDict(self):
+  def testCreateSuiteMainsDict(self):
     self._AddSampleData()
     suites = update_test_suites._FetchSuites()
     self.assertEqual(
@@ -209,9 +209,9 @@ class ListTestSuitesTest(testing_common.TestCase):
             'really': {'Chromium': {'mac': False, 'win7': False}},
             'scrolling': {'Chromium': {'mac': False, 'win7': False}},
         },
-        update_test_suites._CreateSuiteMastersDict(suites))
+        update_test_suites._CreateSuiteMainsDict(suites))
 
-  def testMasterToBotsToDeprecatedDict(self):
+  def testMainToBotsToDeprecatedDict(self):
     self._AddSampleData()
     suites = [
         utils.TestKey('Chromium/mac/dromaeo').get(),
@@ -221,7 +221,7 @@ class ListTestSuitesTest(testing_common.TestCase):
     suites[0].put()
     self.assertEqual(
         {'Chromium': {'mac': True, 'win7': False}},
-        update_test_suites._MasterToBotsToDeprecatedDict(suites))
+        update_test_suites._MainToBotsToDeprecatedDict(suites))
 
   def testCreateSuiteMonitoredDict(self):
     self._AddSampleData()

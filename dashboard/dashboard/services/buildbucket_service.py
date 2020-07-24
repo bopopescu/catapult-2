@@ -15,7 +15,7 @@ _DISCOVERY_URL = (
     '/api/discovery/v1/apis/{api}/{apiVersion}/rest')
 
 # Default Buildbucket bucket name.
-_BUCKET_NAME = 'master.tryserver.chromium.perf'
+_BUCKET_NAME = 'main.tryserver.chromium.perf'
 
 
 def _DiscoverService(http):

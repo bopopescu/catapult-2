@@ -62,13 +62,13 @@ class EditAnomalyConfigsTest(testing_common.TestCase):
     self.SetCurrentUser('sullivan@chromium.org', is_admin=True)
     anomaly_config.AnomalyConfig(
         id='Existing Config', config={'old': 11},
-        patterns=['MyMaster/*/*/*']).put()
+        patterns=['MyMain/*/*/*']).put()
 
     self.testapp.post('/edit_anomaly_configs', {
         'add-edit': 'edit',
         'edit-name': 'Existing Config',
         'config': '{"new": 10}',
-        'patterns': 'MyMaster/*/*/*',
+        'patterns': 'MyMain/*/*/*',
         'xsrf_token': xsrf.GenerateToken(users.get_current_user()),
     })
 
@@ -76,23 +76,23 @@ class EditAnomalyConfigsTest(testing_common.TestCase):
     self.assertEqual(len(anomaly_configs), 1)
     self.assertEqual('Existing Config', anomaly_configs[0].key.string_id())
     self.assertEqual({'new': 10}, anomaly_configs[0].config)
-    self.assertEqual(['MyMaster/*/*/*'], anomaly_configs[0].patterns)
+    self.assertEqual(['MyMain/*/*/*'], anomaly_configs[0].patterns)
 
   def testEdit_AddPattern(self):
     """Tests changing the patterns list of an existing AnomalyConfig."""
     self.SetCurrentUser('sullivan@chromium.org', is_admin=True)
-    master = graph_data.Master(id='TheMaster').put()
-    graph_data.Bot(id='TheBot', parent=master).put()
-    suite1 = graph_data.TestMetadata(id='TheMaster/TheBot/Suite1').put()
-    suite2 = graph_data.TestMetadata(id='TheMaster/TheBot/Suite2').put()
+    main = graph_data.Main(id='TheMain').put()
+    graph_data.Bot(id='TheBot', parent=main).put()
+    suite1 = graph_data.TestMetadata(id='TheMain/TheBot/Suite1').put()
+    suite2 = graph_data.TestMetadata(id='TheMain/TheBot/Suite2').put()
     test_aaa = graph_data.TestMetadata(
-        id='TheMaster/TheBot/Suite1/aaa', has_rows=True).put()
+        id='TheMain/TheBot/Suite1/aaa', has_rows=True).put()
     test_bbb = graph_data.TestMetadata(
-        id='TheMaster/TheBot/Suite1/bbb', has_rows=True).put()
+        id='TheMain/TheBot/Suite1/bbb', has_rows=True).put()
     test_ccc = graph_data.TestMetadata(
-        id='TheMaster/TheBot/Suite1/ccc', has_rows=True).put()
+        id='TheMain/TheBot/Suite1/ccc', has_rows=True).put()
     test_ddd = graph_data.TestMetadata(
-        id='TheMaster/TheBot/Suite2/ddd', has_rows=True).put()
+        id='TheMain/TheBot/Suite2/ddd', has_rows=True).put()
     anomaly_config.AnomalyConfig(id='1-Suite1-specific', config={'a': 10}).put()
     anomaly_config.AnomalyConfig(id='2-Suite1-general', config={'b': 20}).put()
 
@@ -148,19 +148,19 @@ class EditAnomalyConfigsTest(testing_common.TestCase):
     anomaly_config_key = anomaly_config.AnomalyConfig(
         id='Test Config', config={'a': 10},
         patterns=['*/*/one', '*/*/two']).put()
-    master = graph_data.Master(id='TheMaster').put()
-    graph_data.Bot(id='TheBot', parent=master).put()
+    main = graph_data.Main(id='TheMain').put()
+    graph_data.Bot(id='TheBot', parent=main).put()
     test_one = graph_data.TestMetadata(
-        id='TheMaster/TheBot/one', overridden_anomaly_config=anomaly_config_key,
+        id='TheMain/TheBot/one', overridden_anomaly_config=anomaly_config_key,
         has_rows=True).put()
     test_two = graph_data.TestMetadata(
-        id='TheMaster/TheBot/two', overridden_anomaly_config=anomaly_config_key,
+        id='TheMain/TheBot/two', overridden_anomaly_config=anomaly_config_key,
         has_rows=True).put()
 
     # Verify the state of the data before making the request.
     self.assertEqual(['*/*/one', '*/*/two'], anomaly_config_key.get().patterns)
     self.assertEqual(
-        ['TheMaster/TheBot/one'],
+        ['TheMain/TheBot/one'],
         list_tests.GetTestsMatchingPattern('*/*/one'))
 
     self.testapp.post('/edit_anomaly_configs', {

@@ -55,7 +55,7 @@ class UtilsTest(testing_common.TestCase):
         'ChromiumPerf/cros-*/dromaeo.*/Total')
     self._AssertDoesntMatch(
         'ChromiumPerf/cros-one/dromaeo.top25/Total',
-        'OtherMaster/cros-*/dromaeo.*/Total')
+        'OtherMain/cros-*/dromaeo.*/Total')
 
   def testMatchesPattern_MorePartialWildcards(self):
     # Note that the wildcard matches zero or more characters.
@@ -79,8 +79,8 @@ class UtilsTest(testing_common.TestCase):
 
   def _PutEntitiesAllExternal(self):
     """Puts entities (none internal-only) and returns the keys."""
-    master = graph_data.Master(id='M').put()
-    graph_data.Bot(parent=master, id='b').put()
+    main = graph_data.Main(id='M').put()
+    graph_data.Bot(parent=main, id='b').put()
     keys = [
         graph_data.TestMetadata(id='M/b/a', internal_only=False).put(),
         graph_data.TestMetadata(id='M/b/b', internal_only=False).put(),
@@ -91,8 +91,8 @@ class UtilsTest(testing_common.TestCase):
 
   def _PutEntitiesHalfInternal(self):
     """Puts entities (half internal-only) and returns the keys."""
-    master = graph_data.Master(id='M').put()
-    graph_data.Bot(parent=master, id='b').put()
+    main = graph_data.Main(id='M').put()
+    graph_data.Bot(parent=main, id='b').put()
     keys = [
         graph_data.TestMetadata(id='M/b/ax', internal_only=True).put(),
         graph_data.TestMetadata(id='M/b/a', internal_only=False).put(),
@@ -121,7 +121,7 @@ class UtilsTest(testing_common.TestCase):
     self.assertEqual(len(keys), len(utils.GetMulti(keys)))
 
   def testTestPath_Test(self):
-    key = ndb.Key('Master', 'm', 'Bot', 'b', 'Test', 'suite', 'Test', 'metric')
+    key = ndb.Key('Main', 'm', 'Bot', 'b', 'Test', 'suite', 'Test', 'metric')
     self.assertEqual('m/b/suite/metric', utils.TestPath(key))
 
   def testTestPath_TestMetadata(self):
@@ -138,7 +138,7 @@ class UtilsTest(testing_common.TestCase):
 
   def testTestMetadataKey_Test(self):
     key = utils.TestMetadataKey(
-        ndb.Key('Master', 'm', 'Bot', 'b', 'Test', 'suite', 'Test', 'metric'))
+        ndb.Key('Main', 'm', 'Bot', 'b', 'Test', 'suite', 'Test', 'metric'))
     self.assertEqual('TestMetadata', key.kind())
     self.assertEqual('m/b/suite/metric', key.id())
     self.assertEqual(('TestMetadata', 'm/b/suite/metric'), key.flat())
@@ -160,7 +160,7 @@ class UtilsTest(testing_common.TestCase):
 
   def testOldStyleTestKey_Test(self):
     original_key = ndb.Key(
-        'Master', 'm', 'Bot', 'b', 'Test', 'suite', 'Test', 'metric')
+        'Main', 'm', 'Bot', 'b', 'Test', 'suite', 'Test', 'metric')
     key = utils.OldStyleTestKey(original_key)
     self.assertEqual(original_key, key)
 
@@ -169,7 +169,7 @@ class UtilsTest(testing_common.TestCase):
     self.assertEqual('Test', key.kind())
     self.assertEqual('metric', key.id())
     self.assertEqual(
-        ('Master', 'm', 'Bot', 'b', 'Test', 'suite', 'Test', 'metric'),
+        ('Main', 'm', 'Bot', 'b', 'Test', 'suite', 'Test', 'metric'),
         key.flat())
 
   def testOldStyleTestKey_String(self):
@@ -177,11 +177,11 @@ class UtilsTest(testing_common.TestCase):
     self.assertEqual('Test', key.kind())
     self.assertEqual('metric', key.id())
     self.assertEqual(
-        ('Master', 'm', 'Bot', 'b', 'Test', 'suite', 'Test', 'metric'),
+        ('Main', 'm', 'Bot', 'b', 'Test', 'suite', 'Test', 'metric'),
         key.flat())
 
   def testTestSuiteName_Basic(self):
-    key = utils.TestKey('Master/bot/suite-foo/sub/x/y/z')
+    key = utils.TestKey('Main/bot/suite-foo/sub/x/y/z')
     self.assertEqual('suite-foo', utils.TestSuiteName(key))
 
   def testMinimumRange_Empty_ReturnsNone(self):

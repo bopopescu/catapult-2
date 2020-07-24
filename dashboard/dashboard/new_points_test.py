@@ -59,10 +59,10 @@ class NewPointsTest(testing_common.TestCase):
 
   def _AddInternalSampleData(self):
     """Adds some internal-only test data."""
-    master = graph_data.Master(id='XMaster').put()
-    graph_data.Bot(id='x-bot', parent=master, internal_only=True).put()
+    main = graph_data.Main(id='XMain').put()
+    graph_data.Bot(id='x-bot', parent=main, internal_only=True).put()
     test = graph_data.TestMetadata(
-        id='XMaster/x-bot/xtest', internal_only=True).put()
+        id='XMain/x-bot/xtest', internal_only=True).put()
     test_container_key = utils.GetTestContainerKey(test)
     for i in range(50):
       graph_data.Row(parent=test_container_key, id=i + 1000, value=i + 1000,
@@ -87,7 +87,7 @@ class NewPointsTest(testing_common.TestCase):
     # When the users' query pattern has no matching test, the user should be
     # notified that this is the case.
     response = self.testapp.get('/new_points',
-                                {'pattern': 'ImaginaryMaster/*/*/mytest'})
+                                {'pattern': 'ImaginaryMain/*/*/mytest'})
     self.assertTrue('No tests matching pattern' in response.body)
     self.assertEqual(1, len(re.findall(r'<tr>', response.body)))
 
@@ -112,10 +112,10 @@ class NewPointsTest(testing_common.TestCase):
     self.assertEqual(1, len(re.findall(r'<tr>', response.body)))
 
   def testGet_WithMaxTestsParam(self):
-    master = graph_data.Master(id='XMaster').put()
-    graph_data.Bot(id='x-bot', parent=master).put()
+    main = graph_data.Main(id='XMain').put()
+    graph_data.Bot(id='x-bot', parent=main).put()
     for i in range(20):
-      test = graph_data.TestMetadata(id='XMaster/x-bot/xtest-%d' % i).put()
+      test = graph_data.TestMetadata(id='XMain/x-bot/xtest-%d' % i).put()
       test_container_key = utils.GetTestContainerKey(test)
       graph_data.Row(parent=test_container_key, id=1, value=1).put()
 

@@ -514,7 +514,7 @@ class TestCli(test_case.MainTestCase):
         self.check(['--test-results-server', 'localhost'], ret=2,
                    out=('Error: --builder-name must be specified '
                         'along with --test-result-server\n'
-                        'Error: --master-name must be specified '
+                        'Error: --main-name must be specified '
                         'along with --test-result-server\n'
                         'Error: --test-type must be specified '
                         'along with --test-result-server\n'), err='')
@@ -669,7 +669,7 @@ class TestCli(test_case.MainTestCase):
         try:
             self.check(['--test-results-server',
                         '%s:%d' % server.server_address,
-                        '--master-name', 'fake_master',
+                        '--main-name', 'fake_main',
                         '--builder-name', 'fake_builder',
                         '--test-type', 'typ_tests',
                         '--metadata', 'foo=bar'],
@@ -694,7 +694,7 @@ class TestCli(test_case.MainTestCase):
         try:
             self.check(['--test-results-server',
                         '%s:%d' % server.server_address,
-                        '--master-name', 'fake_master',
+                        '--main-name', 'fake_main',
                         '--builder-name', 'fake_builder',
                         '--test-type', 'typ_tests',
                         '--metadata', 'foo=bar'],
@@ -709,7 +709,7 @@ class TestCli(test_case.MainTestCase):
 
     def test_test_results_server_not_running(self):
         self.check(['--test-results-server', 'localhost:99999',
-                    '--master-name', 'fake_master',
+                    '--main-name', 'fake_main',
                     '--builder-name', 'fake_builder',
                     '--test-type', 'typ_tests',
                     '--metadata', 'foo=bar'],

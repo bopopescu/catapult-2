@@ -41,7 +41,7 @@ class AddPointQueueHandler(request_handler.RequestHandler):
     Request parameters:
       data: JSON encoding of a list of dictionaries. Each dictionary represents
           one point to add. For each dict, one Row entity will be added, and
-          any required TestMetadata or Master or Bot entities will be created.
+          any required TestMetadata or Main or Bot entities will be created.
     """
     datastore_hooks.SetPrivilegedRequest()
 
@@ -94,12 +94,12 @@ def _PrewarmGets(data):
   Args:
     data: The request json.
   """
-  # Prewarm lookups of masters, bots, and tests.
-  master_keys = {ndb.Key('Master', r['master']) for r in data}
-  bot_keys = {ndb.Key('Master', r['master'], 'Bot', r['bot']) for r in data}
+  # Prewarm lookups of mains, bots, and tests.
+  main_keys = {ndb.Key('Main', r['main']) for r in data}
+  bot_keys = {ndb.Key('Main', r['main'], 'Bot', r['bot']) for r in data}
   test_keys = set()
   for row in data:
-    start = '%s/%s' % (row['master'], row['bot'])
+    start = '%s/%s' % (row['main'], row['bot'])
     test_parts = row['test'].split('/')
     for part in test_parts:
       if not part:
@@ -107,7 +107,7 @@ def _PrewarmGets(data):
       start += '/%s' % part
       test_keys.add(ndb.Key('TestMetadata', start))
 
-  ndb.get_multi_async(list(master_keys) + list(bot_keys) + list(test_keys))
+  ndb.get_multi_async(list(main_keys) + list(bot_keys) + list(test_keys))
 
 
 def _AddRow(row_dict, bot_whitelist):
@@ -138,8 +138,8 @@ def _AddRow(row_dict, bot_whitelist):
   row_id = add_point.GetAndValidateRowId(row_dict)
 
   # Update the last-added revision record for this test.
-  master, bot, test = row_dict['master'], row_dict['bot'], row_dict['test']
-  test_path = '%s/%s/%s' % (master, bot, test)
+  main, bot, test = row_dict['main'], row_dict['bot'], row_dict['test']
+  test_path = '%s/%s/%s' % (main, bot, test)
   last_added_revision_entity = graph_data.LastAddedRevision(
       id=test_path, revision=row_id)
   entity_put_futures = []
@@ -170,7 +170,7 @@ def _GetParentTest(row_dict, bot_whitelist):
   Raises:
     RuntimeError: Something went wrong when trying to get the parent test.
   """
-  master_name = row_dict.get('master')
+  main_name = row_dict.get('main')
   bot_name = row_dict.get('bot')
   test_name = row_dict.get('test').strip('/')
   units = row_dict.get('units')
@@ -180,7 +180,7 @@ def _GetParentTest(row_dict, bot_whitelist):
   benchmark_description = row_dict.get('benchmark_description')
 
   parent_test = _GetOrCreateAncestors(
-      master_name, bot_name, test_name, units=units,
+      main_name, bot_name, test_name, units=units,
       improvement_direction=improvement_direction,
       internal_only=internal_only,
       benchmark_description=benchmark_description)
@@ -210,17 +210,17 @@ def _BotInternalOnly(bot_name, bot_whitelist):
 
 
 def _GetOrCreateAncestors(
-    master_name, bot_name, test_name, units=None,
+    main_name, bot_name, test_name, units=None,
     improvement_direction=None, internal_only=True, benchmark_description=''):
-  """Gets or creates all parent Master, Bot, TestMetadata entities for a Row."""
+  """Gets or creates all parent Main, Bot, TestMetadata entities for a Row."""
 
-  master_entity = _GetOrCreateMaster(master_name)
-  _GetOrCreateBot(bot_name, master_entity.key, internal_only)
+  main_entity = _GetOrCreateMain(main_name)
+  _GetOrCreateBot(bot_name, main_entity.key, internal_only)
 
   # Add all ancestor tests to the datastore in order.
   ancestor_test_parts = test_name.split('/')
 
-  test_path = '%s/%s' % (master_name, bot_name)
+  test_path = '%s/%s' % (main_name, bot_name)
   suite = None
   for index, ancestor_test_name in enumerate(ancestor_test_parts):
     # Certain properties should only be updated if the TestMetadata is for a
@@ -242,18 +242,18 @@ def _GetOrCreateAncestors(
   return ancestor_test
 
 
-def _GetOrCreateMaster(name):
-  """Gets or creates a new Master."""
-  existing = graph_data.Master.get_by_id(name)
+def _GetOrCreateMain(name):
+  """Gets or creates a new Main."""
+  existing = graph_data.Main.get_by_id(name)
   if existing:
     return existing
-  new_entity = graph_data.Master(id=name)
+  new_entity = graph_data.Main(id=name)
   new_entity.put()
   return new_entity
 
 
 def _GetOrCreateBot(name, parent_key, internal_only):
-  """Gets or creates a new Bot under the given Master."""
+  """Gets or creates a new Bot under the given Main."""
   existing = graph_data.Bot.get_by_id(name, parent=parent_key)
   if existing:
     if existing.internal_only != internal_only:

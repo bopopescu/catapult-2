@@ -44,10 +44,10 @@ index %(hash_a)s..%(hash_b)s 100644
 """
 
 _BOT_BROWSER_MAP_KEY = 'bot_browser_map'
-_INTERNAL_MASTERS_KEY = 'internal_masters'
+_INTERNAL_MASTERS_KEY = 'internal_mains'
 _BUILDER_TYPES_KEY = 'bisect_builder_types'
-_MASTER_TRY_SERVER_MAP_KEY = 'master_try_server_map'
-_MASTER_BUILDBUCKET_MAP_KEY = 'master_buildbucket_map'
+_MASTER_TRY_SERVER_MAP_KEY = 'main_try_server_map'
+_MASTER_BUILDBUCKET_MAP_KEY = 'main_buildbucket_map'
 _NON_TELEMETRY_TEST_COMMANDS = {
     'angle_perftests': [
         './out/Release/angle_perftests',
@@ -128,14 +128,14 @@ class StartBisectHandler(request_handler.RequestHandler):
   def _PerformBisectStep(self, user):
     """Gathers the parameters for a bisect job and triggers the job."""
     bug_id = int(self.request.get('bug_id', -1))
-    master_name = self.request.get('master', 'ChromiumPerf')
+    main_name = self.request.get('main', 'ChromiumPerf')
     internal_only = self.request.get('internal_only') == 'true'
     bisect_bot = self.request.get('bisect_bot')
     bypass_no_repro_check = self.request.get('bypass_no_repro_check') == 'true'
 
     bisect_config = GetBisectConfig(
         bisect_bot=bisect_bot,
-        master_name=master_name,
+        main_name=main_name,
         suite=self.request.get('suite'),
         metric=self.request.get('metric'),
         good_revision=self.request.get('good_revision'),
@@ -159,7 +159,7 @@ class StartBisectHandler(request_handler.RequestHandler):
         config=config_python_string,
         bug_id=bug_id,
         email=user.email(),
-        master_name=master_name,
+        main_name=main_name,
         internal_only=internal_only,
         job_type='bisect')
 
@@ -222,12 +222,12 @@ def _PrefillInfo(test_path):
   graph_key = utils.TestKey(graph_path)
 
   info = {'suite': suite.test_name}
-  info['master'] = suite.master_name
+  info['main'] = suite.main_name
   info['internal_only'] = suite.internal_only
-  info['use_archive'] = _CanDownloadBuilds(suite.master_name)
+  info['use_archive'] = _CanDownloadBuilds(suite.main_name)
 
-  info['all_bots'] = _GetAvailableBisectBots(suite.master_name)
-  info['bisect_bot'] = GuessBisectBot(suite.master_name, suite.bot_name)
+  info['all_bots'] = _GetAvailableBisectBots(suite.main_name)
+  info['bisect_bot'] = GuessBisectBot(suite.main_name, suite.bot_name)
 
   user = users.get_current_user()
   if not user:
@@ -271,7 +271,7 @@ def _PrefillInfo(test_path):
 
 
 def GetBisectConfig(
-    bisect_bot, master_name, suite, metric, good_revision, bad_revision,
+    bisect_bot, main_name, suite, metric, good_revision, bad_revision,
     repeat_count, max_time_minutes, bug_id, story_filter=None, use_archive=None,
     bisect_mode='mean', bypass_no_repro_check=False):
   """Fills in a JSON response with the filled-in config file.
@@ -279,7 +279,7 @@ def GetBisectConfig(
   Args:
     bisect_bot: Bisect bot name. (This should be either a legacy bisector or a
         recipe-enabled tester).
-    master_name: Master name of the test being bisected.
+    main_name: Main name of the test being bisected.
     suite: Test suite name of the test being bisected.
     metric: Bisect bot "metric" parameter, in the form "chart/trace".
     good_revision: Known good revision number.
@@ -320,7 +320,7 @@ def GetBisectConfig(
       'repeat_count': str(repeat_count),
       'max_time_minutes': str(max_time_minutes),
       'bug_id': str(bug_id),
-      'builder_type': _BuilderType(master_name, use_archive),
+      'builder_type': _BuilderType(main_name, use_archive),
       'target_arch': GuessTargetArch(bisect_bot),
       'bisect_mode': bisect_mode,
   }
@@ -330,11 +330,11 @@ def GetBisectConfig(
   return config_dict
 
 
-def _BuilderType(master_name, use_archive):
+def _BuilderType(main_name, use_archive):
   """Returns the builder_type string to use in the bisect config.
 
   Args:
-    master_name: The test master name.
+    main_name: The test main name.
     use_archive: Whether or not to use archived builds.
 
   Returns:
@@ -343,9 +343,9 @@ def _BuilderType(master_name, use_archive):
   if not use_archive:
     return ''
   builder_types = namespaced_stored_object.Get(_BUILDER_TYPES_KEY)
-  if not builder_types or master_name not in builder_types:
+  if not builder_types or main_name not in builder_types:
     return 'perf'
-  return builder_types[master_name]
+  return builder_types[main_name]
 
 
 def GuessTargetArch(bisect_bot):
@@ -392,35 +392,35 @@ def _GetPerfTryConfig(
   return config_dict
 
 
-def _GetAvailableBisectBots(master_name):
-  """Gets all available bisect bots corresponding to a master name."""
+def _GetAvailableBisectBots(main_name):
+  """Gets all available bisect bots corresponding to a main name."""
   bisect_bot_map = namespaced_stored_object.Get(can_bisect.BISECT_BOT_MAP_KEY)
-  for master, platform_bot_pairs in bisect_bot_map.iteritems():
-    if master_name.startswith(master):
+  for main, platform_bot_pairs in bisect_bot_map.iteritems():
+    if main_name.startswith(main):
       return sorted({bot for _, bot in platform_bot_pairs})
   return []
 
 
-def _CanDownloadBuilds(master_name):
+def _CanDownloadBuilds(main_name):
   """Checks whether bisecting using archives is supported."""
-  return master_name.startswith('ChromiumPerf')
+  return main_name.startswith('ChromiumPerf')
 
 
-def GuessBisectBot(master_name, bot_name):
+def GuessBisectBot(main_name, bot_name):
   """Returns a bisect bot name based on |bot_name| (perf_id) string."""
   fallback = 'linux_perf_bisect'
   bisect_bot_map = namespaced_stored_object.Get(can_bisect.BISECT_BOT_MAP_KEY)
   if not bisect_bot_map:
     return fallback
   bot_name = bot_name.lower()
-  for master, platform_bot_pairs in bisect_bot_map.iteritems():
+  for main, platform_bot_pairs in bisect_bot_map.iteritems():
     # Treat ChromiumPerfFyi (etc.) the same as ChromiumPerf.
-    if master_name.startswith(master):
+    if main_name.startswith(main):
       for platform, bisect_bot in platform_bot_pairs:
         if platform.lower() in bot_name:
           return bisect_bot
   # Nothing was found; log a warning and return a fall-back name.
-  logging.warning('No bisect bot for %s/%s.', master_name, bot_name)
+  logging.warning('No bisect bot for %s/%s.', main_name, bot_name)
   return fallback
 
 
@@ -642,7 +642,7 @@ def _PerformPerfTryJob(perf_job):
 
   # Get the base config file contents and make a patch.
   try:
-    base_config = gitiles_service.FileContents('chromium/src', 'master',
+    base_config = gitiles_service.FileContents('chromium/src', 'main',
                                                _PERF_CONFIG_PATH)
   except urlfetch.Error:
     base_config = None
@@ -667,8 +667,8 @@ def _PerformPerfTryJob(perf_job):
   url = 'https://codereview.chromium.org/%s/' % issue_id
 
   # Tell Rietveld to try the patch.
-  master = 'tryserver.chromium.perf'
-  trypatch_success = server.TryPatch(master, issue_id, patchset_id, bot)
+  main = 'tryserver.chromium.perf'
+  trypatch_success = server.TryPatch(main, issue_id, patchset_id, bot)
   if trypatch_success:
     # Create TryJob entity. The update_bug_with_results and auto_bisect
     # cron jobs will be tracking, or restarting the job.
@@ -763,10 +763,10 @@ def _PerformBuildbucketBisect(bisect_job):
 
 def _GetTryServerBucket(bisect_job):
   """Returns the bucket name to be used by buildbucket."""
-  master_bucket_map = namespaced_stored_object.Get(_MASTER_BUILDBUCKET_MAP_KEY)
-  default = 'master.tryserver.chromium.perf'
-  if not master_bucket_map:
+  main_bucket_map = namespaced_stored_object.Get(_MASTER_BUILDBUCKET_MAP_KEY)
+  default = 'main.tryserver.chromium.perf'
+  if not main_bucket_map:
     logging.warning(
         'Could not get bucket to be used by buildbucket, using default.')
     return default
-  return master_bucket_map.get(bisect_job.master_name, default)
+  return main_bucket_map.get(bisect_job.main_name, default)

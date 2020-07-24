@@ -296,7 +296,7 @@ class StartBisectTest(testing_common.TestCase):
         })
     namespaced_stored_object.Set(
         start_try_job._BUILDER_TYPES_KEY,
-        {'ChromiumPerf': 'perf', 'OtherMaster': 'foo'})
+        {'ChromiumPerf': 'perf', 'OtherMain': 'foo'})
     namespaced_stored_object.Set(
         start_try_job._BOT_BROWSER_MAP_KEY,
         [
@@ -308,7 +308,7 @@ class StartBisectTest(testing_common.TestCase):
     namespaced_stored_object.Set(
         start_try_job._MASTER_BUILDBUCKET_MAP_KEY,
         {
-            'ChromiumPerf': 'master.tryserver.chromium.perf'
+            'ChromiumPerf': 'main.tryserver.chromium.perf'
         })
     testing_common.SetSheriffDomains(['chromium.org'])
     # Add fake Rietveld auth info.
@@ -377,7 +377,7 @@ class StartBisectTest(testing_common.TestCase):
     self.assertEqual('foo@chromium.org', info['email'])
     self.assertEqual('page_cycler.morejs', info['suite'])
     self.assertEqual('times/http___test.com_', info['default_metric'])
-    self.assertEqual('ChromiumPerf', info['master'])
+    self.assertEqual('ChromiumPerf', info['main'])
     self.assertFalse(info['internal_only'])
     self.assertTrue(info['use_archive'])
     self.assertEqual(
@@ -456,7 +456,7 @@ class StartBisectTest(testing_common.TestCase):
     self._TestGetBisectConfig(
         {
             'bisect_bot': 'linux_perf_bisect',
-            'master_name': 'ChromiumPerf',
+            'main_name': 'ChromiumPerf',
             'suite': 'page_cycler.moz',
             'metric': 'times/page_load_time',
             'good_revision': '265549',
@@ -491,7 +491,7 @@ class StartBisectTest(testing_common.TestCase):
     self._TestGetBisectConfig(
         {
             'bisect_bot': 'linux_perf_bisect',
-            'master_name': 'ChromiumPerf',
+            'main_name': 'ChromiumPerf',
             'suite': 'page_cycler.moz',
             'metric': 'times/page_load_time',
             'good_revision': '265549',
@@ -524,7 +524,7 @@ class StartBisectTest(testing_common.TestCase):
     self._TestGetBisectConfig(
         {
             'bisect_bot': 'win_perf_bisect',
-            'master_name': 'ChromiumPerf',
+            'main_name': 'ChromiumPerf',
             'suite': 'page_cycler.morejs',
             'metric': 'times/http___test.com_',
             'good_revision': '12345',
@@ -558,7 +558,7 @@ class StartBisectTest(testing_common.TestCase):
     self._TestGetBisectConfig(
         {
             'bisect_bot': 'linux_perf_bisect',
-            'master_name': 'ChromiumPerf',
+            'main_name': 'ChromiumPerf',
             'suite': 'page_cycler.moz',
             'metric': 'times/page_load_time',
             'good_revision': '265549',
@@ -594,7 +594,7 @@ class StartBisectTest(testing_common.TestCase):
         {
             'bisect_bot': 'linux_perf_bisect',
             'suite': 'page_cycler.moz',
-            'master_name': 'ChromiumPerf',
+            'main_name': 'ChromiumPerf',
             'metric': 'times/page_load_time',
             'good_revision': '265549',
             'bad_revision': '265556',
@@ -609,26 +609,26 @@ class StartBisectTest(testing_common.TestCase):
   def testGuessBisectBot_FetchesNameFromBisectBotMap(self):
     namespaced_stored_object.Set(
         can_bisect.BISECT_BOT_MAP_KEY,
-        {'OtherMaster': [('foo', 'super_foo_bisect_bot')]})
+        {'OtherMain': [('foo', 'super_foo_bisect_bot')]})
     self.assertEqual(
         'super_foo_bisect_bot',
-        start_try_job.GuessBisectBot('OtherMaster', 'foo'))
+        start_try_job.GuessBisectBot('OtherMain', 'foo'))
 
   def testGuessBisectBot_PlatformNotFound_UsesFallback(self):
     namespaced_stored_object.Set(
         can_bisect.BISECT_BOT_MAP_KEY,
-        {'OtherMaster': [('foo', 'super_foo_bisect_bot')]})
+        {'OtherMain': [('foo', 'super_foo_bisect_bot')]})
     self.assertEqual(
         'linux_perf_bisect',
-        start_try_job.GuessBisectBot('OtherMaster', 'bar'))
+        start_try_job.GuessBisectBot('OtherMain', 'bar'))
 
-  def testGuessBisectBot_TreatsMasterNameAsPrefix(self):
+  def testGuessBisectBot_TreatsMainNameAsPrefix(self):
     namespaced_stored_object.Set(
         can_bisect.BISECT_BOT_MAP_KEY,
-        {'OtherMaster': [('foo', 'super_foo_bisect_bot')]})
+        {'OtherMain': [('foo', 'super_foo_bisect_bot')]})
     self.assertEqual(
         'super_foo_bisect_bot',
-        start_try_job.GuessBisectBot('OtherMasterFyi', 'foo'))
+        start_try_job.GuessBisectBot('OtherMainFyi', 'foo'))
 
   @mock.patch.object(start_try_job.buildbucket_service, 'PutJob',
                      mock.MagicMock(return_value='1234567'))
@@ -666,7 +666,7 @@ class StartBisectTest(testing_common.TestCase):
     bisect_job = try_job.TryJob(
         bot='foo',
         config='config = {}',
-        master_name='ChromiumPerf',
+        main_name='ChromiumPerf',
         internal_only=False,
         job_type='bisect')
     self.assertEqual(
@@ -837,7 +837,7 @@ class StartBisectTest(testing_common.TestCase):
     self._TestGetBisectConfig(
         {
             'bisect_bot': 'win_perf_bisect',
-            'master_name': 'ChromiumPerf',
+            'main_name': 'ChromiumPerf',
             'suite': 'page_cycler.morejs',
             'metric': 'times/page_load_time',
             'good_revision': '12345',
@@ -870,7 +870,7 @@ class StartBisectTest(testing_common.TestCase):
     self._TestGetBisectConfig(
         {
             'bisect_bot': 'win_x64_perf_bisect',
-            'master_name': 'ChromiumPerf',
+            'main_name': 'ChromiumPerf',
             'suite': 'page_cycler.moz',
             'metric': 'times/page_load_time',
             'good_revision': '265549',
